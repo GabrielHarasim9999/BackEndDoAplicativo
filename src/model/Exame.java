@@ -8,16 +8,22 @@ public class Exame {
     private LocalDate dataExame;
     private String resultado;
     private Long pacienteId;
+    private Long medicoId;
 
     public Exame() {
     }
 
     public Exame(Long id, String tipo, LocalDate dataExame, String resultado, Long pacienteId) {
+        this(id, tipo, dataExame, resultado, pacienteId, null);
+    }
+
+    public Exame(Long id, String tipo, LocalDate dataExame, String resultado, Long pacienteId, Long medicoId) {
         this.id = id;
         this.tipo = tipo;
         this.dataExame = dataExame;
         this.resultado = resultado;
         this.pacienteId = pacienteId;
+        this.medicoId = medicoId;
     }
 
     public Long getId() {
@@ -58,5 +64,13 @@ public class Exame {
 
     public void setPacienteId(Long pacienteId) {
         this.pacienteId = pacienteId;
+    }
+
+    public Long getMedicoId() {
+        return medicoId;
+    }
+
+    public void setMedicoId(Long medicoId) {
+        this.medicoId = medicoId;
     }
 }
