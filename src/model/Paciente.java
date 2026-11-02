@@ -6,24 +6,29 @@ public class Paciente {
     private String email;
     private String CPF;
 
-    public Paciente  (Long id, String nome, String email, String CPF){
-        this.id= id;
+    public Paciente() {
+    }
+
+    public Paciente(Long id, String nome, String email, String CPF) {
         setNome(nome);
         setEmail(email);
         setCPF(CPF);
         setId(id);
-
     }
 
     public Long getId() {
         return id;
     }
 
-    public void setNome(String nome){
-        this.nome= nome;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public String getNome(){
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getNome() {
         return nome;
     }
 
@@ -31,17 +36,15 @@ public class Paciente {
         return CPF;
     }
 
+    public void setCPF(String CPF) {
+        this.CPF = CPF;
+    }
+
     public String getEmail() {
         return email;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    private void setEmail(String email) {
-    }
-
-    private void setCPF(String cpf) {
+    public void setEmail(String email) {
+        this.email = email;
     }
 }
