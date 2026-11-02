@@ -9,6 +9,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -17,18 +19,18 @@ public class ExameDao implements CrudDao<Exame, Long> {
 
     @Override
     public Exame criar(Exame exame) throws SQLException {
+        if (exame == null) {
+            throw new IllegalArgumentException("Exame não pode ser nulo");
+        }
+
         String sql = "INSERT INTO exame (tipo, data_exame, resultado, paciente_id, medico_id) VALUES (?, ?, ?, ?, ?)";
         try (Connection conexao = ConnectionFactory.abrirConexao();
              PreparedStatement comando = conexao.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             comando.setString(1, exame.getTipo());
-            comando.setDate(2, Date.valueOf(exame.getDataExame()));
+            setDataExame(comando, 2, exame.getDataExame());
             comando.setString(3, exame.getResultado());
             comando.setLong(4, exame.getPacienteId());
-            if (exame.getMedicoId() == null) {
-                comando.setNull(5, java.sql.Types.BIGINT);
-            } else {
-                comando.setLong(5, exame.getMedicoId());
-            }
+            setMedicoId(comando, 5, exame.getMedicoId());
             comando.executeUpdate();
 
             try (ResultSet chavesGeradas = comando.getGeneratedKeys()) {
@@ -55,6 +57,14 @@ public class ExameDao implements CrudDao<Exame, Long> {
         return Optional.empty();
     }
 
+    public List<Exame> listarPorPaciente(Long pacienteId) throws SQLException {
+        return listarPorCampo("paciente_id", pacienteId);
+    }
+
+    public List<Exame> listarPorMedico(Long medicoId) throws SQLException {
+        return listarPorCampo("medico_id", medicoId);
+    }
+
     @Override
     public List<Exame> listarTodos() throws SQLException {
         String sql = "SELECT id, tipo, data_exame, resultado, paciente_id, medico_id FROM exame";
@@ -71,18 +81,18 @@ public class ExameDao implements CrudDao<Exame, Long> {
 
     @Override
     public boolean atualizar(Exame exame) throws SQLException {
+        if (exame == null) {
+            throw new IllegalArgumentException("Exame não pode ser nulo");
+        }
+
         String sql = "UPDATE exame SET tipo = ?, data_exame = ?, resultado = ?, paciente_id = ?, medico_id = ? WHERE id = ?";
         try (Connection conexao = ConnectionFactory.abrirConexao();
              PreparedStatement comando = conexao.prepareStatement(sql)) {
             comando.setString(1, exame.getTipo());
-            comando.setDate(2, Date.valueOf(exame.getDataExame()));
+            setDataExame(comando, 2, exame.getDataExame());
             comando.setString(3, exame.getResultado());
             comando.setLong(4, exame.getPacienteId());
-            if (exame.getMedicoId() == null) {
-                comando.setNull(5, java.sql.Types.BIGINT);
-            } else {
-                comando.setLong(5, exame.getMedicoId());
-            }
+            setMedicoId(comando, 5, exame.getMedicoId());
             comando.setLong(6, exame.getId());
             return comando.executeUpdate() > 0;
         }
@@ -95,6 +105,37 @@ public class ExameDao implements CrudDao<Exame, Long> {
              PreparedStatement comando = conexao.prepareStatement(sql)) {
             comando.setLong(1, id);
             return comando.executeUpdate() > 0;
+        }
+    }
+
+    private List<Exame> listarPorCampo(String campo, Long valor) throws SQLException {
+        String sql = "SELECT id, tipo, data_exame, resultado, paciente_id, medico_id FROM exame WHERE " + campo + " = ?";
+        List<Exame> exames = new ArrayList<>();
+        try (Connection conexao = ConnectionFactory.abrirConexao();
+             PreparedStatement comando = conexao.prepareStatement(sql)) {
+            comando.setLong(1, valor);
+            try (ResultSet resultado = comando.executeQuery()) {
+                while (resultado.next()) {
+                    exames.add(mapearExame(resultado));
+                }
+            }
+        }
+        return exames;
+    }
+
+    private void setDataExame(PreparedStatement comando, int indice, LocalDate dataExame) throws SQLException {
+        if (dataExame == null) {
+            comando.setNull(indice, Types.DATE);
+        } else {
+            comando.setDate(indice, Date.valueOf(dataExame));
+        }
+    }
+
+    private void setMedicoId(PreparedStatement comando, int indice, Long medicoId) throws SQLException {
+        if (medicoId == null) {
+            comando.setNull(indice, Types.BIGINT);
+        } else {
+            comando.setLong(indice, medicoId);
         }
     }
 
